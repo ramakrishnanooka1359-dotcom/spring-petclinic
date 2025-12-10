@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
-      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
 
     steps:
       - name: Checkout repository
@@ -27,22 +25,22 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
-      - name: Build and run tests (generate coverage)
+      - name: Build and run tests
         run: ./mvnw -B clean test
 
       - name: Generate JaCoCo report
         run: ./mvnw -B jacoco:report
 
-    
       - name: SonarCloud Scan
-        run: mvn -B verify sonar:sonar \
-         -Dsonar.projectKey=YOUR_PROJECT_KEY \
-         -Dsonar.organization=YOUR_ORG \
-         -Dsonar.host.url=https://sonarcloud.io \
-         -Dsonar.login=${{ secrets.SONAR_TOKEN }}
- 
+        run: |
+          mvn -B verify sonar:sonar \
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@master
         with:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+
